@@ -1,0 +1,61 @@
+# Baseline Experiments Configuration
+# ===================================
+# Configuration for running baseline attack methods
+
+defaults:
+  - ../default
+
+experiment:
+  name: "baseline_comparison"
+  description: "Compare baseline attacks (FGSM, PGD, C&W, AutoAttack)"
+
+# Baseline attacks to run
+baselines:
+  fgsm:
+    enabled: true
+    epsilon: [0.01, 0.02, 0.03]
+    
+  pgd:
+    enabled: true
+    epsilon: [0.01, 0.02, 0.03]
+    iterations: [10, 20, 40]
+    step_size: 0.007
+    random_start: true
+    restarts: 1
+    
+  bim:
+    enabled: true
+    epsilon: [0.01, 0.02, 0.03]
+    iterations: [10, 20, 40]
+    step_size: 0.007
+    
+  cw:
+    enabled: true
+    confidence: 0
+    learning_rate: 0.01
+    max_iterations: 1000
+    binary_search_steps: 9
+    
+  autoattack:
+    enabled: true
+    norm: "Linf"
+    epsilon: 0.03
+    version: "standard"  # standard, plus, rand
+
+# Datasets to test
+datasets:
+  - "pathmnist"
+  - "chestmnist"
+  - "pneumoniamnist"
+
+# Models to attack
+models:
+  - "resnet50"
+  - "densenet121"
+  - "efficientnet_b0"
+
+# Evaluation
+evaluation:
+  n_samples: 1000
+  save_adversarial: true
+  compute_all_metrics: true

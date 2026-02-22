@@ -1,0 +1,48 @@
+# Core ML
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.24.0
+scipy>=1.10.0
+
+# Medical datasets
+medmnist>=2.2.0
+
+# RL
+stable-baselines3>=2.1.0
+gymnasium>=0.29.0
+
+# Image processing
+opencv-python>=4.8.0
+Pillow>=10.0.0
+scikit-image>=0.21.0
+
+# Metrics
+lpips>=0.1.4
+pytorch-msssim>=1.0.0
+
+# Adversarial attacks (baselines)
+foolbox>=3.3.3
+
+# Configuration
+pyyaml>=6.0
+omegaconf>=2.3.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+tensorboard>=2.14.0
+wandb>=0.15.0
+
+# Utilities
+tqdm>=4.65.0
+pandas>=2.0.0
+einops>=0.6.1
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Development
+black>=23.7.0
+isort>=5.12.0
+flake8>=6.1.0

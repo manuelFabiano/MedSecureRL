@@ -1,0 +1,169 @@
+# MedSecure Default Configuration
+# ================================
+
+# Project metadata
+project:
+  name: "medsecure"
+  seed: 42
+  device: "cuda"  # cuda, cpu, or mps
+  output_dir: "results"
+  checkpoint_dir: "checkpoints"
+
+# Data configuration
+data:
+  dataset: "pathmnist"  # pathmnist, chestmnist, pneumoniamnist, dermamnist
+  data_dir: "./data/medmnist"
+  batch_size: 64
+  num_workers: 4
+  train_split: 0.8
+  val_split: 0.1
+  test_split: 0.1
+  image_size: 224
+  normalize: true
+  augmentation:
+    enabled: false
+    horizontal_flip: 0.5
+    rotation: 15
+
+# Victim model configuration
+victim:
+  architecture: "resnet18"  # resnet50, densenet121, efficientnet_b0
+  pretrained: true
+  num_classes: null  # Auto-detected from dataset
+  checkpoint: null  # Path to trained weights
+  freeze_bn: false
+
+# Attack configuration
+attack:
+  # Global constraints
+  epsilon_max: 0.03  # Maximum L-inf perturbation (medical: keep small)
+  epsilon_min: 0.001
+  max_iterations: 100
+  early_stop: true
+  
+  # Enabled strategies
+  strategies:
+    - "pixel"
+    - "frequency"
+    - "patch"
+    - "semantic"
+  
+  # Strategy-specific parameters
+  pixel:
+    method: "pgd"  # fgsm, pgd, bim
+    step_size: 0.007
+    random_start: true
+    
+  frequency:
+    transform: "dct"  # dct, fft, dwt
+    target_bands: "low"  # low, high, mid, adaptive
+    band_ratio: 0.25  # Fraction of coefficients to perturb
+    
+  patch:
+    size: 32  # Patch size in pixels
+    position: "random"  # random, corner, center, learned
+    shape: "square"  # square, circle, adaptive
+    
+  semantic:
+    transforms:
+      - "brightness"
+      - "contrast"
+      - "saturation"
+      - "rotation"
+    max_brightness: 0.3
+    max_contrast: 0.3
+    max_rotation: 15  # degrees
+
+# RL configuration
+rl:
+  algorithm: "SAC"  # SAC, PPO, TD3
+  
+  # State space (20 dimensions)
+  state:
+    gradient_features: 5  # Gradient statistics
+    confidence_features: 4  # Model confidence info
+    attack_features: 6  # Attack progress
+    image_features: 5  # Image characteristics
+    
+  # Action space
+  action:
+    strategy_discrete: true  # Discrete strategy selection
+    continuous_params: 3  # epsilon, iterations, step_size
+    
+  # SAC hyperparameters
+  sac:
+    learning_rate: 3e-4
+    buffer_size: 100000
+    batch_size: 256
+    tau: 0.005
+    gamma: 0.99
+    train_freq: 1
+    gradient_steps: 1
+    target_entropy: "auto"
+    
+  # Training
+  training:
+    total_timesteps: 500000
+    eval_freq: 5000
+    n_eval_episodes: 50
+    save_freq: 10000
+    warmup_steps: 10000
+    
+
+# Reward configuration
+reward:
+  # Success reward
+  success:
+    weight: 10.0
+    targeted_bonus: 5.0  # Extra for targeted attack
+    
+  # Imperceptibility reward
+  imperceptibility:
+    weight: 2.0
+    ssim_threshold: 0.95
+    ssim_weight: 1.0
+    psnr_weight: 0.5
+    lpips_weight: 0.5
+    
+  # Efficiency reward
+  efficiency:
+    weight: 1.0
+    query_penalty: -0.01  # Per query
+    iteration_penalty: -0.001  # Per iteration
+    
+  # Diversity bonus
+  diversity:
+    weight: 0.5
+    strategy_bonus: 0.1  # For using new strategy
+    coverage_bonus: 0.2  # For finding new vulnerability type
+
+# Evaluation configuration
+evaluation:
+  # Metrics to compute
+  metrics:
+    - "asr"  # Attack Success Rate
+    - "ssim"  # Structural Similarity
+    - "psnr"  # Peak Signal-to-Noise Ratio
+    - "lpips"  # Learned Perceptual Image Patch Similarity
+    
+  # Thresholds
+  thresholds:
+    ssim_min: 0.95
+    psnr_min: 30.0
+    lpips_max: 0.1
+    
+  # Evaluation settings
+  n_samples: 1000
+  batch_size: 32
+  save_images: true
+  save_perturbations: true
+
+# Logging configuration
+logging:
+  level: "INFO"
+  tensorboard: true
+  wandb:
+    enabled: false
+    project: "medsecure"
+    entity: null
+  save_frequency: 1000
